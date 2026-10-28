@@ -55,7 +55,7 @@ def main():
             return
 
     df = st.session_state["full_data"]
-    st.write(jf"Məlumat sətir sayı: {df.shape[0]}")
+    st.write(f"Məlumat sətir sayı: {df.shape[0]}")
 
     # Kateqoriya seçimi və axtarış
     column_name = st.selectbox("Axtarış etmək istədiyiniz kateqoriyanı seçin:", df.columns)
