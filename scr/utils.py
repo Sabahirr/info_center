@@ -1,63 +1,32 @@
+
+
 import pandas as pd
 import streamlit as st
-import requests
-import io
 
+
+# Cache edilmiş yükləmə funksiyası
 @st.cache_data
-def load_data(file_url: str):
-    try:
-        if "drive.google.com" in file_url and "id=" in file_url:
-            file_id = file_url.split("id=")[1].split("&")[0]
-            download_url = f"https://drive.google.com/uc?export=download&id={file_id}"
-        else:
-            download_url = file_url
-
-        response = requests.get(download_url)
-        response.raise_for_status()
-        
-        # Gelen məlumatın həqiqətən parquet olub-olmadığını yoxlayaq
-        st.write(f"Fayl endirildi, ölçü (bayt): {len(response.content)}")
-        
-        df = pd.read_parquet(io.BytesIO(response.content), engine='pyarrow')
-        return df
-    except Exception as e:
-        # Xətanı birbaşa tətbiqdə göstər ki, səbəbi bilək
-        st.error(load_data_error := f"Yüklənmə xətası: {str(e)}")
-        raise RuntimeError(load_data_error)
+def load_data(file_path: str):
+    return pd.read_parquet(file_path, engine='pyarrow')
 
 
 def filter_csv_by_column(df, column_name, filter_value):
+    """
+    Filters a DataFrame based on a specific column's value and returns the filtered data.
+
+    Args:
+        df (pd.DataFrame): DataFrame to filter.
+        column_name (str): Column name to filter by.
+        filter_value (str): Value to filter the column by.
+
+    Returns:
+        pd.DataFrame: Filtered DataFrame.
+    """
+    # Ensure the column and filter value are strings and strip extra spaces
     df[column_name] = df[column_name].astype(str).str.strip()
     filter_value = str(filter_value).strip()
-    return df[df[column_name] == filter_value]
 
-# import pandas as pd
-# import streamlit as st
+    # Apply the filter
+    filtered_data = df[df[column_name] == filter_value]
 
-
-# # Cache edilmiş yükləmə funksiyası
-# @st.cache_data
-# def load_data(file_path: str):
-#     return pd.read_parquet(file_path, engine='pyarrow')
-
-
-# def filter_csv_by_column(df, column_name, filter_value):
-#     """
-#     Filters a DataFrame based on a specific column's value and returns the filtered data.
-
-#     Args:
-#         df (pd.DataFrame): DataFrame to filter.
-#         column_name (str): Column name to filter by.
-#         filter_value (str): Value to filter the column by.
-
-#     Returns:
-#         pd.DataFrame: Filtered DataFrame.
-#     """
-#     # Ensure the column and filter value are strings and strip extra spaces
-#     df[column_name] = df[column_name].astype(str).str.strip()
-#     filter_value = str(filter_value).strip()
-
-#     # Apply the filter
-#     filtered_data = df[df[column_name] == filter_value]
-
-#     return filtered_data
+    return filtered_data
